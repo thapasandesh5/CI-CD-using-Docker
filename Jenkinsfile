@@ -1,60 +1,39 @@
 pipeline {
     agent any
- 
-   tools
-    {
-       maven "Maven"
+    tools{
+        maven 'Maven'
     }
- stages {
-      stage('checkout') {
-           steps {
-             
-                git branch: 'master', url: 'https://github.com/devops4solutions/CI-CD-using-Docker.git'
-             
-          }
-        }
-  stage('Execute Maven') {
-           steps {
-             
-                sh 'mvn package'             
-          }
-        }
-stage('Docker Build and Tag') {
-           steps {
-              
-                sh 'docker build -t samplewebapp:latest .' 
-                sh 'docker tag samplewebapp nikhilnidhi/samplewebapp:latest'
-                //sh 'docker tag samplewebapp nikhilnidhi/samplewebapp:$BUILD_NUMBER'
-               
-          }
-        }
-     
-  stage('Publish image to Docker Hub') {
-          
-            steps {
-        withDockerRegistry([ credentialsId: "Dockercredit", url: "" ]) {
-          sh  'docker push nikhilnidhi/samplewebapp:latest'
-        //  sh  'docker push nikhilnidhi/samplewebapp:$BUILD_NUMBER' 
-        }
-                  
-          }
-        }
-     
-      stage('Run Docker container on Jenkins Agent') {
-             
-            steps 
-   {
-                sh "docker run -d -p 8003:8080 nikhilnidhi/samplewebapp"
- 
+    stages{
+        stage('Build Maven'){
+            steps{
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/thapasandesh5/devops-automation.git']]])
+                sh 'mvn clean install'
             }
         }
- stage('Run Docker container on remote hosts') {
-             
-            steps {
-                sh "docker -H ssh://ec2-user@172.31.32.245 run -d -p 8003:8080 nikhilnidhi/samplewebapp"
- 
+        stage('Build docker image'){
+            steps{
+                script{
+                    sh 'docker build -t javatechie/devops-integration .'
+                }
+            }
+        }
+        stage('Push image to Hub'){
+            steps{
+                script{
+                   withCredentials([string(credentialsId: 'Dockercredit', variable: 'Dockercredit')]) {
+                   sh 'docker login -u javatechie -p ${dockerhubpwd}'
+
+}
+                   sh 'docker push javatechie/devops-integration'
+                }
+            }
+        }
+        stage('Deploy to k8s'){
+            steps{
+                script{
+                    kubernetesDeploy (configs: 'deploymentservice.yaml',kubeconfigId: 'k8sconfigpwd')
+                }
             }
         }
     }
-	}
-    
+}
