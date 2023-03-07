@@ -24,7 +24,7 @@ pipeline {
                    sh 'docker login -u thapasandesh5 -p ${Dockercredit}'
 
 }
-                   sh 'docker push javatechie/devops-integration'
+                   sh 'docker push thapasandesh5/devops-integration'
                 }
             }
         }
