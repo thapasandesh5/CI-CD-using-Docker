@@ -32,7 +32,7 @@ pipeline {
              
             steps 
 			{
-                sh "docker run -d -p 8005:8080 devops-integration:tagname"
+                sh "docker run -d -p 8006:8080 devops-integration:tagname"
  
             }
         }
