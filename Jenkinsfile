@@ -28,12 +28,20 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to k8s'){
-            steps{
-                script{
-                    kubernetesDeploy (configs: 'deploymentservice.yaml',kubeconfigId: 'k8sconfigpwd')
-                }
+  stage('Run Docker container on Jenkins Agent') {
+             
+            steps 
+			{
+                sh "docker run -d -p 8003:8080 nikhilnidhi/samplewebapp"
+ 
+            }
+        }
+ stage('Run Docker container on remote hosts') {
+             
+            steps {
+                sh "docker -H ssh://ec2-user@172.31.32.245 run -d -p 8003:8080 nikhilnidhi/samplewebapp"
+ 
             }
         }
     }
-}
+	}
