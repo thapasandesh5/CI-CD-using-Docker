@@ -1,7 +1,7 @@
 pipeline {
     agent any
-	
-	  tools
+ 
+   tools
     {
        maven "Maven"
     }
@@ -13,19 +13,17 @@ pipeline {
              
           }
         }
-	 stage('Execute Maven') {
+  stage('Execute Maven') {
            steps {
              
                 sh 'mvn package'             
           }
         }
-        
-
-  stage('Docker Build and Tag') {
+stage('Docker Build and Tag') {
            steps {
               
                 sh 'docker build -t samplewebapp:latest .' 
-                sh 'docker tag samplewebapp thapasandesh5/samplewebapp:latest'
+                sh 'docker tag samplewebapp nikhilnidhi/samplewebapp:latest'
                 //sh 'docker tag samplewebapp nikhilnidhi/samplewebapp:$BUILD_NUMBER'
                
           }
@@ -35,7 +33,7 @@ pipeline {
           
             steps {
         withDockerRegistry([ credentialsId: "dockerHub", url: "" ]) {
-          sh  'docker push thapasandesh5/samplewebapp:latest'
+          sh  'docker push nikhilnidhi/samplewebapp:latest'
         //  sh  'docker push nikhilnidhi/samplewebapp:$BUILD_NUMBER' 
         }
                   
@@ -45,8 +43,8 @@ pipeline {
       stage('Run Docker container on Jenkins Agent') {
              
             steps 
-			{
-                sh "docker run -d -p 8003:8080 thapasandesh5/samplewebapp"
+   {
+                sh "docker run -d -p 8003:8080 nikhilnidhi/samplewebapp"
  
             }
         }
